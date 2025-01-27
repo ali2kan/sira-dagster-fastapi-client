@@ -1,20 +1,29 @@
 services:
   dagster-trigger:
-    build:
-      context: ./trigger-service
-      dockerfile: Dockerfile
+    image: fast-api-dagster-client
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
     container_name: dagster-trigger
     ports:
       - "8000:8000"
+    # Command to run the service
+    command:
+      [
+        "uvicorn",
+        "trigger_service.trigger:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+      ]
     environment:
-      - DAGSTER_GRAPHQL_URL=http://dagster-webserver:3000/graphql
+      - DAGSTER_GRAPHQL_URL=http://10.10.10.34:3000/graphql
       - DAGSTER_REPOSITORY_LOCATION=${DAGSTER_REPOSITORY_LOCATION}
       - DAGSTER_REPOSITORY_NAME=${DAGSTER_REPOSITORY_NAME:-__repository__}
-      - API_KEY=${TRIGGER_API_KEY}
+      # - API_KEY=${TRIGGER_API_KEY}
     networks:
       - dagster-network
-    depends_on:
-      - dagster-webserver
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
