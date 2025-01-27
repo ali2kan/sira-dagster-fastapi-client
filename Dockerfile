@@ -1,9 +1,15 @@
 # Use Python 3.9 image
-FROM python:3.9
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /code
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    gcc \
+    g++ \
+    make \
+    && rm -rf /var/lib/apt/lists/*
 # Copy requirements first for better caching
 COPY requirements.txt .
 
