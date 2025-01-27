@@ -4,8 +4,8 @@
 
 A FastAPI service to trigger Dagster jobs via REST API, designed for integration with change detection services.
 
-[![Docker Build](https://github.com/ali2kan/dagster-trigger/actions/workflows/docker-build.yml/badge.svg)](https://github.com/ali2kan/dagster-trigger/actions/workflows/docker-build.yml)
-[![Tests](https://github.com/ali2kan/dagster-trigger/actions/workflows/test.yml/badge.svg)](https://github.com/ali2kan/dagster-trigger/actions/workflows/test.yml)
+[![Docker Build](https://github.com/ali2kan/sira-dagster-fastapi-client/actions/workflows/docker-build.yml/badge.svg)](https://github.com/ali2kan/sira-dagster-fastapi-client/actions/workflows/docker-build.yml)
+[![Tests](https://github.com/ali2kan/sira-dagster-fastapi-client/actions/workflows/test.yml/badge.svg)](https://github.com/ali2kan/sira-dagster-fastapi-client/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
