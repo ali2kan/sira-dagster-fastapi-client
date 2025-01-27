@@ -1,10 +1,10 @@
 services:
-  dagster-trigger:
+  dagster-fastapi-client:
     image: ghcr.io/ali2kan/sira-dagster-fastapi-client:latest
     # build:
     #   context: .
     #   dockerfile: Dockerfile
-    container_name: dagster-trigger
+    container_name: dagster-fastapi-client
     ports:
       - "8000:8000"
     # Command to run the service
@@ -26,7 +26,7 @@ services:
       - DAGSTER_REPOSITORY_NAME=__repository__
       - API_KEY=${FAST_API_KEY}
     networks:
-      - dagster-network
+      - dagster_network
     volumes:
       - .:/code
     healthcheck:
