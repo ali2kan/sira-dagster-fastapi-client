@@ -27,6 +27,8 @@ services:
       # - API_KEY=${TRIGGER_API_KEY}
     networks:
       - dagster-network
+    volumes:
+      - .:/app
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

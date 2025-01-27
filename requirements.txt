@@ -10,4 +10,6 @@ PyYAML>=6.0
 fastapi>=0.95.0
 uvicorn>=0.34.0
 httpx>=0.28.0
-strawberry-graphql>=0.217.1
+
+
+strawberry-graphql>=0.258.0

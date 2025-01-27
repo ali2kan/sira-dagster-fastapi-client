@@ -1,6 +1,5 @@
 import logging
 import os
-from typing import Dict
 
 import strawberry
 from dagster_graphql import DagsterGraphQLClient, DagsterGraphQLClientError
