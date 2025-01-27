@@ -1,5 +1,4 @@
 dagster>=1.9.10
-dagster-webserver>=1.9.10
 dagster-graphql>=1.9.10
 clickhouse-connect>=0.8.15
 python-dotenv>=1.0.1
