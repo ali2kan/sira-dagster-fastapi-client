@@ -1,6 +1,6 @@
 services:
   dagster-trigger:
-    image: fast-api-dagster-client-2
+    image: ghcr.io/ali2kan/sira-dagster-fastapi-client:latest
     # build:
     #   context: .
     #   dockerfile: Dockerfile
