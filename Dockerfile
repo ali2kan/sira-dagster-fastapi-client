@@ -1,29 +1,18 @@
-# Use Python 3.11 slim image
-FROM python:3.12-slim
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    gcc \
-    python3-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Use Python 3.9 image
+FROM python:3.9
 
 # Set working directory
-WORKDIR /app
+WORKDIR /code
 
-# Copy requirements first to leverage Docker cache
+# Copy requirements first for better caching
 COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY trigger_service /code/trigger_service
 
-# Add health check endpoint to the service
-COPY healthcheck.py .
-
-# Expose the FastAPI port
-EXPOSE 8000
+# Command to run the application
+CMD ["uvicorn", "trigger_service.trigger:app", "--host", "0.0.0.0", "--port", "8000"]
 
