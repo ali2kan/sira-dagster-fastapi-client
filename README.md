@@ -1,20 +1,37 @@
-# Dagster Job Trigger Service
+# 🎯 Dagster Job Trigger Service
+
+<div align="center">
+
+![Dagster + FastAPI](https://user-images.githubusercontent.com/your-id/dagster-trigger.png)
 
 A FastAPI service to trigger Dagster jobs via REST API, designed for integration with change detection services.
 
-## Overview
+[![Docker Build](https://github.com/yourusername/dagster-trigger/actions/workflows/docker-build.yml/badge.svg)](https://github.com/yourusername/dagster-trigger/actions/workflows/docker-build.yml)
+[![Tests](https://github.com/yourusername/dagster-trigger/actions/workflows/test.yml/badge.svg)](https://github.com/yourusername/dagster-trigger/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+</div>
+
+## 🌟 Overview
 
 This service provides secure REST endpoints to trigger Dagster jobs via GraphQL API, primarily used with [changedetection.io](https://changedetection.io/) to update databases when external data sources change.
 
-## Features
+```mermaid
+graph LR
+    A[changedetection.io] -->|Webhook| B[Trigger Service]
+    B -->|GraphQL| C[Dagster]
+    C -->|Execute| D[Job]
+```
 
-- Secure job triggering with API key authentication
-- Health check endpoint
-- Async job execution
-- Comprehensive error handling and logging
-- Integration with changedetection.io
+## ✨ Features
 
-## Configuration
+- 🔐 Secure job triggering with API key authentication
+- 🏥 Health check endpoint
+- ⚡ Async job execution
+- 🛡️ Comprehensive error handling and logging
+- 🔄 Integration with changedetection.io
+
+## ⚙️ Configuration
 
 ### Environment Variables
 
@@ -25,6 +42,19 @@ DAGSTER_TIMEOUT_SECONDS=30
 REPOSITORY_LOCATION=dlt_pipelines    # Dagster repository location
 REPOSITORY_NAME=__repository__       # Dagster repository name
 API_KEY=your_secret_key    # API key for authentication
+```
+
+### System Architecture
+
+```mermaid
+flowchart TD
+    A[Client] -->|API Request| B[FastAPI Service]
+    B -->|Authenticate| C{API Key Valid?}
+    C -->|Yes| D[Trigger Job]
+    C -->|No| E[401 Unauthorized]
+    D -->|GraphQL| F[Dagster]
+    F -->|Execute| G[Job Running]
+    G -->|Complete| H[Return Status]
 ```
 
 ### Adding New Jobs
@@ -46,7 +76,7 @@ AVAILABLE_JOBS = {
 }
 ```
 
-## Installation
+## 🚀 Installation
 
 ### Using Docker (Recommended)
 
@@ -78,24 +108,24 @@ pip install -r requirements.txt
 uvicorn trigger_service.trigger:app --host 0.0.0.0 --port 8000
 ```
 
-## API Usage
+## 🔌 API Usage
 
-### Authentication
+### Authentication Methods
 
-The service supports two methods of API key authentication:
-
-1. HTTP Header: `X-API-Key: your_api_key`
-2. URL Parameter: `/trigger/job_name?api_key=your_api_key`
+| Method | Description | Example |
+|--------|-------------|---------|
+| Header | Use X-API-Key header | `X-API-Key: your_api_key` |
+| URL Param | Include in query string | `?api_key=your_api_key` |
 
 ### API Endpoints
 
-#### Health Check
+#### 🏥 Health Check
 
 ```bash
 curl http://localhost:8000/health
 ```
 
-#### Trigger Job
+#### 🎯 Trigger Job
 
 ```bash
 curl -X POST http://localhost:8000/trigger/countries_job -H "X-API-Key: your_api_key"
@@ -103,7 +133,7 @@ curl -X POST http://localhost:8000/trigger/countries_job -H "X-API-Key: your_api
 curl -X POST "http://localhost:8000/trigger/countries_job?api_key=your_api_key"
 ```
 
-### Integration with changedetection.io
+### 🔄 Integration with changedetection.io
 
 1. Set up [changedetection.io](https://changedetection.io/) to monitor your data source
 2. Configure a webhook notification:
@@ -129,7 +159,7 @@ notification_urls:
   - http://localhost:8000/trigger/countries_job?api_key=your_api_key
 ```
 
-## Dagster GraphQL Integration
+## 🔍 Dagster GraphQL Integration
 
 The service uses Dagster's GraphQL API to trigger jobs. Here's how to find the correct parameters for your setup:
 
@@ -239,7 +269,7 @@ Example variables for launching a job:
 }
 ```
 
-## Development
+## 👩‍💻 Development
 
 ### Project Structure
 
@@ -268,7 +298,7 @@ pytest
 flake8 trigger_service
 ```
 
-## Monitoring
+## 📊 Monitoring
 
 ### Logs
 
@@ -282,53 +312,52 @@ docker logs -f dagster-trigger
 
 Access FastAPI metrics at `/metrics` endpoint (if enabled).
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 Common issues and solutions:
 
-1. **Connection Refused**
-   - Check if Dagster is running
-   - Verify DAGSTER_HOST and DAGSTER_PORT
+| Issue | Solution |
+|-------|----------|
+| 🔌 Connection Refused | Check if Dagster is running and verify DAGSTER_HOST/PORT |
+| 🔍 Job Not Found | Verify job name and repository configuration |
+| ⏱️ Timeout Issues | Adjust DAGSTER_TIMEOUT_SECONDS |
+| 🔑 Authentication Issues | Verify API_KEY configuration |
 
-2. **Job Not Found**
-   - Verify job name in config.py
-   - Check Dagster repository configuration
-
-3. **Timeout Issues**
-   - Adjust DAGSTER_TIMEOUT_SECONDS
-   - Check network connectivity
-
-4. **Authentication Issues**
-   - Verify API_KEY is set correctly
-   - Check API key is being passed correctly in header or URL
-
-## References
+## 📚 References
 
 - [Stack Overflow: Repository Location Name in Dagster](https://stackoverflow.com/questions/64752262/what-is-the-value-of-repositorylocationname-when-running-executepipeline-in-dag)
 - [GitHub Discussion: Launching Dagster Jobs via GraphQL](https://github.com/dagster-io/dagster/discussions/21131)
 - [Medium Article: Dagster GraphQL Integration](https://sairamkrish.medium.com/dagster-graphql-integration-35382c0f4bba)
 
-## Security Considerations
+## 🔒 Security Considerations
 
 1. Use HTTPS in production
 2. Configure CORS appropriately
 3. Use environment variables for sensitive data
 4. Protect API keys and sensitive configuration
 
-## License
+## 📄 License
 
 MIT License
 
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Submit a pull request
 
-## Support
+## 💬 Support
 
 Create an issue in the repository for:
 
-- Bug reports
-- Feature requests
-- General questions
+- 🐛 Bug reports
+- ✨ Feature requests
+- ❓ General questions
+
+---
+
+<div align="center">
+
+Made with ❤️ by ali2kan
+
+</div>
