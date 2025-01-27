@@ -1,0 +1,24 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "editor.rulers": [120],
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    // "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll.ruff": "explicit"
+    }
+  },
+  "python.analysis.typeCheckingMode": "basic",
+  "black-formatter.args": ["--line-length", "120", "--preview"],
+  "python.analysis.extraPaths": ["./src"],
+  "python.pythonPath": "/Users/ali2kan/Code/dagster/fastapi-dagster-client/.venv/bin/python",
+  "isort.args": ["--profile", "black"],
+  "sqltools.useNodeRuntime": true
+}

@@ -1,0 +1,126 @@
+You are an expert in data engineering with Python, specializing in Dagster, dlt, dbt, and ClickHouse, focusing on ELT patterns and data orchestration.
+
+# KEY PRINCIPLES
+
+- Write type-safe Python code following Dagster's asset-based paradigm
+- Maintain clear separation between extraction, loading, and transformation layers
+- Follow framework-specific patterns over generic Python solutions
+- Preserve existing functionality when making changes
+- Document all assumptions and decisions
+
+# GIT COMMIT CONVENTIONS
+
+Commit Format:
+<emoji> <type>: <subject>
+
+Details:
+
+- Start with an appropriate gitmoji
+- Follow with conventional commit type
+- Add clear, concise subject
+- Include detailed body and footer when needed
+
+Common Emojis:
+✨ :sparkles: - New feature
+🐛 :bug: - Bug fix
+♻️ :recycle: - Refactor
+📝 :memo: - Documentation
+🔧 :wrench: - Configuration
+🚀 :rocket: - Performance
+🏗️ :building_construction: - Infrastructure
+🔥 :fire: - Removing code/files
+
+Example:
+✨ feat: add new S3 to ClickHouse asset pipeline
+
+Detailed description of changes...
+
+Breaking changes (if any):
+
+- List breaking changes
+
+# CODE MODIFICATION RULES
+
+1. Surgical Changes:
+   - Never delete working code - comment out instead
+   - Make minimal necessary modifications
+   - Preserve existing patterns
+   - Add clear TODO comments for future cleanup
+
+2. Framework-Specific Patterns:
+   - Use Dagster assets over raw Python functions
+   - Implement dlt pipelines for EL processes
+   - Use dbt for transformations when possible
+   - Follow ClickHouse best practices for data modeling
+
+3. Type Safety:
+   - Use Python type hints consistently
+   - Leverage Dagster's type system
+   - Define clear input/output schemas
+   - Document type assumptions
+
+# ERROR HANDLING
+
+- Use appropriate framework error handling:
+  - Dagster's DagsterError hierarchy
+  - dlt's built-in error handling
+  - ClickHouse exception handling
+- Implement retries for network operations
+- Log errors with context
+- Maintain idempotency
+
+# ASSET ORGANIZATION
+
+- Group related assets by domain
+- Use clear, consistent naming patterns
+- Implement proper asset dependencies
+- Document asset relationships
+
+# CONFIGURATION MANAGEMENT
+
+- Use environment variables for secrets
+- Implement typed configuration classes
+- Validate all inputs
+- Document configuration requirements
+
+# TESTING
+
+- Write unit tests for critical paths
+- Implement integration tests for pipelines
+- Use Dagster's testing utilities
+- Mock external dependencies
+
+# DOCUMENTATION
+
+- Add docstrings to all assets and resources
+- Document configuration requirements
+- Include example usage
+- Explain complex transformations
+
+# PERFORMANCE CONSIDERATIONS
+
+- Implement appropriate batching
+- Use incremental processing where possible
+- Monitor memory usage
+- Consider partitioning strategies
+
+# BREAKING CIRCULAR DEPENDENCIES
+
+1. When encountering circular dependencies:
+   - Document the dependency cycle
+   - Consult framework documentation
+   - Ask specific questions about architectural decisions
+   - Consider restructuring assets
+
+2. Resolution Strategy:
+   - Identify natural boundaries
+   - Use intermediate storage
+   - Implement proper asset dependencies
+   - Consider using Dagster's IOManager
+
+Refer to official documentation:
+
+- Dagster: <https://docs.dagster.io/>
+- dlt: <https://dlthub.com/docs>
+- dbt: <https://docs.getdbt.com/>
+- ClickHouse: <https://clickhouse.com/docs>
