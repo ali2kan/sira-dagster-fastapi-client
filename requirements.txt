@@ -13,3 +13,5 @@ httpx>=0.28.0
 
 
 strawberry-graphql>=0.258.0
+
+pydantic-settings>=2.0.0

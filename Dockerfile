@@ -14,5 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY trigger_service /code/trigger_service
 
 # Command to run the application
-CMD ["uvicorn", "trigger_service.trigger:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "trigger_service.trigger:app", "--host", "0.0.0.0", "--port", "8000"]
 

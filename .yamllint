@@ -1,0 +1,28 @@
+extends: default
+
+rules:
+  # 2 space indentation
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # line length
+  line-length:
+    max: 150
+    level: warning
+
+  # don't require document start marker (---)
+  document-start: disable
+
+  # allow comments without space after #
+  comments:
+    min-spaces-from-content: 1
+
+  # other common rules
+  truthy:
+    allowed-values: ["true", "false", "yes", "no"]
+
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 0
