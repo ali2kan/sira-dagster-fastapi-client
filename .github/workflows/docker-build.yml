@@ -46,9 +46,9 @@ jobs:
             type=raw,value=stable,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
             type=ref,event=tag
           labels: |
-            org.opencontainers.image.title=Dagster Code Location Base
-            org.opencontainers.image.description=Lean base image for Dagster code locations
-            com.dagster.type=code-location-base
+            org.opencontainers.image.title=Dagster Job Trigger Service
+            org.opencontainers.image.description=FastAPI service for triggering Dagster jobs via REST API
+            com.dagster.type=trigger-service
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6

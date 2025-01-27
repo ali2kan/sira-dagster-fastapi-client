@@ -26,21 +26,23 @@
 #       - name: Run tests
 #         run: pytest tests/
 
-name: Test Base Image
+name: Test Trigger Service
 
 on:
   push:
     branches: [main]
     paths:
-      - "Dockerfile"
-      - "requirements.txt"
+      - "trigger_service/**"
       - "tests/**"
+      - "requirements.txt"
+      - "Dockerfile"
   pull_request:
     branches: [main]
     paths:
-      - "Dockerfile"
-      - "requirements.txt"
+      - "trigger_service/**"
       - "tests/**"
+      - "requirements.txt"
+      - "Dockerfile"
 
 jobs:
   test:
@@ -48,20 +50,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+
+      - name: Run tests
+        run: pytest tests/
+
       - name: Build test image
-        run: docker build -t dagster-code-location-base:test .
+        run: docker build -t dagster-trigger-service:test .
 
-      - name: Test base image functionality
+      - name: Test service startup
         run: |
-          docker run --rm dagster-code-location-base:test \
-            python -c "import dagster; print(f'Dagster version: {dagster.__version__}')"
-
-      - name: Test GRPC server startup
-        run: |
-          docker run -d --name test-location \
-            -v $(pwd)/example_location:/opt/dagster/app/location \
-            dagster-code-location-base:test \
-            dagster api grpc -h 0.0.0.0 -p 4000
+          docker run -d --name test-service \
+            -e DAGSTER_HOST=mock \
+            -e DAGSTER_PORT=3000 \
+            -e API_KEY=test_key \
+            dagster-trigger-service:test
           sleep 5
-          docker logs test-location
-          docker rm -f test-location
+          docker logs test-service
+          docker rm -f test-service
