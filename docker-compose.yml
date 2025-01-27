@@ -28,15 +28,9 @@ services:
     networks:
       - dagster-network
     volumes:
-      - .:/app
+      - .:/code
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "-f",
-          "http://localhost:8000/health || curl -f http://localhost:8000/",
-        ]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
