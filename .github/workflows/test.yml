@@ -1,0 +1,67 @@
+# name: Test Base Image
+
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: "3.12"
+
+#       - name: Install test dependencies
+#         run: pip install -r requirements-test.txt
+
+#       - name: Build test image
+#         run: docker build -t dagster-core:latest .
+
+#       - name: Run tests
+#         run: pytest tests/
+
+name: Test Base Image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "requirements.txt"
+      - "tests/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "Dockerfile"
+      - "requirements.txt"
+      - "tests/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build test image
+        run: docker build -t dagster-code-location-base:test .
+
+      - name: Test base image functionality
+        run: |
+          docker run --rm dagster-code-location-base:test \
+            python -c "import dagster; print(f'Dagster version: {dagster.__version__}')"
+
+      - name: Test GRPC server startup
+        run: |
+          docker run -d --name test-location \
+            -v $(pwd)/example_location:/opt/dagster/app/location \
+            dagster-code-location-base:test \
+            dagster api grpc -h 0.0.0.0 -p 4000
+          sleep 5
+          docker logs test-location
+          docker rm -f test-location
