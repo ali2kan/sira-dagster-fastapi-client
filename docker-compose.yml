@@ -17,10 +17,13 @@ services:
         "--port",
         "8000",
       ]
+    env_file:
+      - .env
     environment:
-      - DAGSTER_GRAPHQL_URL=http://10.10.10.34:3000/graphql
-      - DAGSTER_REPOSITORY_LOCATION=${DAGSTER_REPOSITORY_LOCATION}
-      - DAGSTER_REPOSITORY_NAME=${DAGSTER_REPOSITORY_NAME:-__repository__}
+      - DAGSTER_HOST=10.10.10.34
+      - DAGSTER_PORT=3000
+      - DAGSTER_REPOSITORY_LOCATION=dlt_pipelines
+      - DAGSTER_REPOSITORY_NAME=__repository__
       # - API_KEY=${TRIGGER_API_KEY}
     networks:
       - dagster-network

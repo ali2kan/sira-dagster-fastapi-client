@@ -1,178 +1,90 @@
-import json
 import logging
 import os
-from functools import lru_cache
-from typing import Any, Dict, Optional
+from typing import Dict
 
-import httpx
-from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import APIKeyHeader
-from pydantic import BaseModel, Field
+import strawberry
+from dagster_graphql import DagsterGraphQLClient, DagsterGraphQLClientError
+from fastapi import FastAPI, HTTPException
+from strawberry.fastapi import GraphQLRouter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-
-# Configuration class
-class Settings:
-    def __init__(self):
-        self.DAGSTER_HOST = os.getenv("DAGSTER_HOST", "dagster-webserver")
-        self.DAGSTER_PORT = int(os.getenv("DAGSTER_PORT", "3000"))
-        self.DAGSTER_GRAPHQL_URL = os.getenv(
-            "DAGSTER_GRAPHQL_URL", f"http://{self.DAGSTER_HOST}:{self.DAGSTER_PORT}/graphql"
-        )
-        self.API_KEY = os.getenv("API_KEY")
-        self.REPOSITORY_LOCATION = os.getenv("DAGSTER_REPOSITORY_LOCATION", "")
-        self.REPOSITORY_NAME = os.getenv("DAGSTER_REPOSITORY_NAME", "__repository__")
-
-
-@lru_cache()
-def get_settings():
-    return Settings()
-
-
 # Initialize FastAPI
 app = FastAPI(title="Dagster Job Trigger Service")
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure Dagster client
+DAGSTER_HOST = os.getenv("DAGSTER_HOST", "10.10.10.34")
+DAGSTER_PORT = int(os.getenv("DAGSTER_PORT", "3000"))
 
-# API key security
-api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+# Create the client with proper URL format
+client = DagsterGraphQLClient(f"http://{DAGSTER_HOST}", port_number=DAGSTER_PORT)
 
 
-class JobLaunchRequest(BaseModel):
-    """Request model for launching a job"""
-
-    job_name: str = Field(..., description="Name of the Dagster job to run")
-    run_config: Optional[Dict[str, Any]] = Field(None, description="Configuration for the job run")
-
-
-async def verify_api_key(api_key: str = Depends(api_key_header)) -> None:
-    """Verify API key if configured"""
-    settings = get_settings()
-    if settings.API_KEY:
-        if not api_key or api_key != settings.API_KEY:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+@strawberry.type
+class JobResponse:
+    status: str
+    run_id: str
+    job_name: str
 
 
-async def launch_dagster_job(
-    job_name: str,
-    run_config: Optional[Dict[str, Any]] = None,
-) -> dict:
-    """Launch a Dagster job using the GraphQL API"""
-    settings = get_settings()
+@strawberry.type
+class Mutation:
+    @strawberry.mutation
+    async def trigger_job(self, job_name: str) -> JobResponse:
+        try:
+            logger.info(f"Attempting to trigger job: {job_name}")
 
-    # Use the working mutation structure
-    mutation = """
-    mutation LaunchRunMutation(
-        $repositoryLocationName: String!
-        $repositoryName: String!
-        $jobName: String!
-        $runConfigData: RunConfigData!
-        $pipelineName: String!
-    ) {
-        launchRun(
-            executionParams: {
-                selector: {
-                    repositoryLocationName: $repositoryLocationName
-                    repositoryName: $repositoryName
-                    jobName: $jobName
-                    pipelineName: $pipelineName
-                }
-                runConfigData: $runConfigData
-            }
-        ) {
-            __typename
-            ... on LaunchRunSuccess {
-                run {
-                    runId
-                }
-            }
-            ... on RunConfigValidationInvalid {
-                errors {
-                    message
-                    reason
-                }
-            }
-            ... on PythonError {
-                message
-            }
-        }
-    }
-    """
-
-    # Prepare variables
-    variables = {
-        "repositoryLocationName": settings.REPOSITORY_LOCATION,
-        "repositoryName": settings.REPOSITORY_NAME,
-        "jobName": job_name,
-        "pipelineName": job_name,  # Using job_name as pipeline name
-        "runConfigData": run_config if run_config is not None else "",
-    }
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                settings.DAGSTER_GRAPHQL_URL, json={"query": mutation, "variables": variables}, timeout=30.0
+            new_run_id = client.submit_job_execution(
+                job_name.strip(),
+                run_config={},
             )
-            response.raise_for_status()
-            result = response.json()
 
-            if "errors" in result:
-                logger.error(f"GraphQL errors: {json.dumps(result['errors'])}")
-                raise HTTPException(status_code=400, detail={"errors": result["errors"]})
+            logger.info(f"Successfully triggered job {job_name} with run_id: {new_run_id}")
+            return JobResponse(status="success", run_id=new_run_id, job_name=job_name)
 
-            launch_result = result["data"]["launchRun"]
-
-            # Handle different response types
-            if launch_result["__typename"] == "RunConfigValidationInvalid":
-                error_messages = [error["message"] for error in launch_result["errors"]]
-                raise HTTPException(status_code=400, detail={"errors": error_messages})
-            elif launch_result["__typename"] == "PythonError":
-                raise HTTPException(status_code=500, detail=launch_result["message"])
-
-            return launch_result
-
-    except httpx.HTTPError as e:
-        logger.error(f"HTTP error occurred: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to communicate with Dagster: {str(e)}")
-    except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        except DagsterGraphQLClientError as exc:
+            error_msg = f"Dagster GraphQL error: {str(exc)}"
+            logger.error(error_msg)
+            raise Exception(error_msg)
 
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy"}
+@strawberry.type
+class Query:
+    @strawberry.field
+    def health(self) -> str:
+        return "healthy"
 
 
+schema = strawberry.Schema(query=Query, mutation=Mutation)
+graphql_app = GraphQLRouter(schema)
+
+# Add the GraphQL router
+app.include_router(graphql_app, prefix="/graphql")
+
+
+# Keep the REST endpoint as well
 @app.post("/trigger/{job_name}")
-async def trigger_job(job_name: str, request: JobLaunchRequest, _=Depends(verify_api_key)):
-    """Trigger a Dagster job by name"""
-    logger.info(f"Triggering job: {job_name}")
-
+async def trigger_job_rest(job_name: str):
+    """
+    REST endpoint to trigger a Dagster job
+    """
     try:
-        result = await launch_dagster_job(
-            job_name=job_name.strip(),  # Remove any trailing spaces
-            run_config=request.run_config,
+        logger.info(f"Attempting to trigger job via REST: {job_name}")
+
+        new_run_id = client.submit_job_execution(
+            job_name.strip(),
+            run_config={},
         )
 
-        logger.info(f"Job launch result: {json.dumps(result)}")
-        return result
+        logger.info(f"Successfully triggered job {job_name} with run_id: {new_run_id}")
+        return {"status": "success", "run_id": new_run_id, "job_name": job_name}
 
-    except Exception as e:
-        logger.error(f"Failed to trigger job {job_name}: {str(e)}")
-        raise
+    except DagsterGraphQLClientError as exc:
+        error_msg = f"Dagster GraphQL error: {str(exc)}"
+        logger.error(error_msg)
+        raise HTTPException(status_code=500, detail={"status": "error", "message": str(exc), "job_name": job_name})
 
 
 if __name__ == "__main__":
